@@ -73,7 +73,7 @@ export interface DealListResponse {
   };
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:4000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? '' : 'http://127.0.0.1:4000');
 
 const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
   const token = window.localStorage.getItem('deal-ledger-auth-token');

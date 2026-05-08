@@ -12,7 +12,14 @@ export const app = express();
 
 app.use(
   cors({
-    origin: env.frontendOrigins,
+    origin: (origin, callback) => {
+      if (!origin || env.frontendOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS.'));
+    },
   }),
 );
 app.use(express.json());
