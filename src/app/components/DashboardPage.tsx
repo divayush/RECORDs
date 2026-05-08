@@ -204,8 +204,8 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-card border border-border rounded-lg p-4 md:p-5">
           <h3 className="text-foreground mb-4">Profit vs Loss</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
+          <ResponsiveContainer width="100%" height={240}>
+            <PieChart margin={{ top: 18, right: 18, bottom: 8, left: 18 }}>
               <Pie
                 data={pieData}
                 cx="50%"
@@ -231,8 +231,8 @@ export default function DashboardPage() {
 
         <div className="bg-card border border-border rounded-lg p-4 md:p-5">
           <h3 className="text-foreground mb-4">Fee Breakdown</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
+          <ResponsiveContainer width="100%" height={240}>
+            <PieChart margin={{ top: 18, right: 18, bottom: 8, left: 18 }}>
               <Pie
                 data={feeBreakdownData}
                 cx="50%"
