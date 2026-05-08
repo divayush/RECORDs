@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum DealStatus {
+  PROFIT
+  LOSS
+  PENDING
+}
+
+model Deal {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  dealAmount     Int
+  holderFee      Int
+  clientFee      Int
+  holderUsername String
+  clientUsername String
+  profit         Int        @default(0)
+  loss           Int        @default(0)
+  dealDate       DateTime
+  status         DealStatus @default(PENDING)
+  notes          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([dealDate])
+  @@index([status])
+  @@index([holderUsername])
+  @@index([clientUsername])
+}
+
+model DashboardCache {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  range      String   @unique
+  data       Json
+  computedAt DateTime @default(now())
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([expiresAt])
+}

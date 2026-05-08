@@ -1,0 +1,4 @@
+{
+  "css.lint.propertyIgnoredDueToDisplay": "ignore",
+  "css.lint.vendorPrefix": "ignore"
+}
