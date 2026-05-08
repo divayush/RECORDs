@@ -146,7 +146,7 @@ export const api = {
   },
 
   updateDeal: async (id: string, payload: DealPayload) => {
-    const response = await request<{ data: Deal }>(`/api/deals/${id}`, {
+    const response = await request<{ data: Deal }>(`/api/deals?id=${encodeURIComponent(id)}`, {
       method: 'PUT',
       body: JSON.stringify(payload),
     });
@@ -154,7 +154,7 @@ export const api = {
   },
 
   deleteDeal: async (id: string) => {
-    await request<void>(`/api/deals/${id}`, {
+    await request<void>(`/api/deals?id=${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
   },

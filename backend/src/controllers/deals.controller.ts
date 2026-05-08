@@ -7,7 +7,7 @@ import type { DealListQuery } from '../models/deal.model.js';
 const isNotFoundError = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025';
 
-const getDealId = (req: Request) => String(req.params.id);
+const getDealId = (req: Request) => String(req.params.id ?? req.query.id ?? '');
 const allowedStatuses = new Set<string>(Object.values(DealStatus));
 
 const toPositiveInt = (value: unknown, fallback: number, max: number) => {
