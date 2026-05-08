@@ -97,7 +97,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
   const hasMoreFilters = Boolean(dateFrom || dateTo || minAmount || maxAmount);
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div className="flex-1 overflow-auto p-4 md:p-6">
       <div className="mb-6">
         <h2 className="text-foreground mb-1">Deal Records</h2>
         <p className="text-sm text-muted-foreground">
@@ -111,7 +111,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
         </div>
       )}
 
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-col gap-3 mb-6 lg:flex-row lg:gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -126,7 +126,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as 'all' | 'PROFIT' | 'LOSS' | 'PENDING')}
-          className="px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring lg:w-auto"
         >
           <option value="all">All Status</option>
           <option value="PROFIT">Profit</option>
@@ -137,7 +137,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
         <button
           type="button"
           onClick={() => setShowMoreFilters((current) => !current)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+          className={`flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors lg:w-auto ${
             showMoreFilters || hasMoreFilters
               ? 'bg-primary text-primary-foreground hover:bg-primary/90'
               : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
@@ -193,7 +193,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-4">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               {hasMoreFilters ? 'Extra filters are active.' : 'Filter records by date or deal amount.'}
             </p>
@@ -308,11 +308,11 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
         )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
           Showing {deals.length} of {totalDeals} deals, page {page} of {totalPages}
         </p>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex">
           <button
             type="button"
             disabled={page <= 1 || isLoading}

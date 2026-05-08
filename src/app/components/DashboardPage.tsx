@@ -130,7 +130,7 @@ export default function DashboardPage() {
       : [{ name: 'No Data', value: 1 }];
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div className="flex-1 overflow-auto p-4 md:p-6">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-foreground mb-1">Dashboard Overview</h2>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex w-fit rounded-lg border border-border bg-input-background p-1">
+        <div className="grid w-full grid-cols-2 rounded-lg border border-border bg-input-background p-1 sm:flex sm:w-fit">
           {timeRangeOptions.map((option) => {
             const isActive = activeRange === option.id;
 
@@ -148,7 +148,7 @@ export default function DashboardPage() {
                 key={option.id}
                 type="button"
                 onClick={() => setActiveRange(option.id)}
-                className={`px-4 py-2 rounded-md text-sm transition-colors ${
+                className={`px-3 py-2 rounded-md text-sm transition-colors sm:px-4 ${
                   isActive
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
@@ -202,9 +202,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-card border border-border rounded-lg p-5">
+        <div className="bg-card border border-border rounded-lg p-4 md:p-5">
           <h3 className="text-foreground mb-4">Profit vs Loss</h3>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
                 data={pieData}
@@ -229,9 +229,9 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-5">
+        <div className="bg-card border border-border rounded-lg p-4 md:p-5">
           <h3 className="text-foreground mb-4">Fee Breakdown</h3>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
                 data={feeBreakdownData}
@@ -268,7 +268,7 @@ export default function DashboardPage() {
 
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="text-foreground mb-3">Profit Over Time</h3>
-          <ResponsiveContainer width="100%" height={190}>
+          <ResponsiveContainer width="100%" height={180}>
             <LineChart data={stats.profitOverTime}>
               <CartesianGrid strokeDasharray="3 3" stroke="#333" />
               <XAxis dataKey="label" stroke="#888" />
@@ -291,7 +291,7 @@ export default function DashboardPage() {
               </p>
             )}
           </div>
-          <ResponsiveContainer width="100%" height={190}>
+          <ResponsiveContainer width="100%" height={180}>
             <BarChart data={stats.volumeData} barCategoryGap="45%">
               <CartesianGrid strokeDasharray="3 3" stroke="#333" />
               <XAxis dataKey="label" stroke="#888" />

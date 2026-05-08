@@ -115,9 +115,9 @@ export default function App() {
   }
 
   return (
-    <div className="dark size-full flex bg-background text-foreground">
+    <div className="dark size-full flex flex-col bg-background text-foreground md:flex-row">
       <Sidebar activePage={activePage} onNavigate={setActivePage} profileName={profile.fullName} />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden pb-20 md:pb-0">
         <Header
           onAddDeal={handleAddDeal}
           searchValue={searchValue}

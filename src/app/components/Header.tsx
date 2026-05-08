@@ -8,9 +8,9 @@ interface HeaderProps {
 
 export default function Header({ onAddDeal, searchValue, onSearchChange }: HeaderProps) {
   return (
-    <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6">
-      <div className="flex items-center gap-4 flex-1">
-        <div className="relative w-96">
+    <header className="border-b border-border bg-card px-4 py-3 md:h-16 md:px-6">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
@@ -20,12 +20,10 @@ export default function Header({ onAddDeal, searchValue, onSearchChange }: Heade
             className="w-full pl-10 pr-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
-      </div>
 
-      <div className="flex items-center gap-3">
         <button
           onClick={onAddDeal}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          className="flex w-full items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors md:w-auto"
         >
           <PlusCircle className="w-4 h-4" />
           <span>Add Deal</span>

@@ -129,7 +129,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
   };
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div className="flex-1 overflow-auto p-4 md:p-6">
       <div className="max-w-3xl mx-auto mb-6">
         <h2 className="text-foreground mb-1">{isEditing ? 'Edit Deal' : 'Add New Deal'}</h2>
         <p className="text-sm text-muted-foreground">
@@ -273,11 +273,11 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:flex">
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               <Save className="w-4 h-4" />
               <span>{isSaving ? 'Saving...' : isEditing ? 'Update Deal' : 'Save Deal'}</span>
@@ -286,7 +286,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
             <button
               type="button"
               onClick={onCancel}
-              className="flex items-center gap-2 px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+              className="flex items-center justify-center gap-2 px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
             >
               <X className="w-4 h-4" />
               <span>Cancel</span>

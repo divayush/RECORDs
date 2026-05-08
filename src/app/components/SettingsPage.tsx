@@ -107,7 +107,7 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
   };
 
   return (
-    <div className="flex-1 overflow-auto p-6">
+    <div className="flex-1 overflow-auto p-4 md:p-6">
       <div className="mb-6">
         <h2 className="text-foreground mb-1">Settings</h2>
         <p className="text-sm text-muted-foreground">Manage your application preferences</p>
@@ -187,7 +187,7 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
         </div>
 
         {/* Save Button */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
             onClick={onLogout}
@@ -196,7 +196,7 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
             Logout
           </button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             {savedMessage && <p className="text-sm text-green-500">{savedMessage}</p>}
             <button
               type="button"
