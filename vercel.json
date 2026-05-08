@@ -3,11 +3,7 @@
   "outputDirectory": "dist",
   "functions": {
     "api/[...path].js": {
-      "includeFiles": [
-        "backend/dist/**",
-        "backend/node_modules/.prisma/client/**",
-        "backend/node_modules/@prisma/client/**"
-      ]
+      "includeFiles": "backend/{dist,node_modules/.prisma/client,node_modules/@prisma/client}/**"
     }
   },
   "rewrites": [
