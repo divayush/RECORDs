@@ -269,7 +269,7 @@ export default function DashboardPage() {
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="text-foreground mb-3">Profit Over Time</h3>
           <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={stats.profitOverTime}>
+            <LineChart data={stats.profitOverTime} margin={{ top: 6, right: 18, left: -8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#333" />
               <XAxis dataKey="label" stroke="#888" />
               <YAxis stroke="#888" />
@@ -292,7 +292,7 @@ export default function DashboardPage() {
             )}
           </div>
           <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={stats.volumeData} barCategoryGap="45%">
+            <BarChart data={stats.volumeData} barCategoryGap="45%" margin={{ top: 6, right: 18, left: -8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#333" />
               <XAxis dataKey="label" stroke="#888" />
               <YAxis stroke="#888" />
