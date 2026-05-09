@@ -81,7 +81,7 @@ function DarkPieTooltip({ active, payload }: PieTooltipProps) {
 }
 
 export default function DashboardPage() {
-  const [activeRange, setActiveRange] = useState<TimeRange>('yearly');
+  const [activeRange, setActiveRange] = useState<TimeRange>('24h');
   const [stats, setStats] = useState<StatsResponse>(emptyStats);
   const [selectedVolumePoint, setSelectedVolumePoint] = useState<{ label: string; volume: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
