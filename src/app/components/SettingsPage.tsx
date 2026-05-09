@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Database, Globe, Download } from 'lucide-react';
-import type { UserProfile } from '../App';
-import { api, type Deal } from '../lib/api';
+import { api, type Deal, type UserProfile } from '../lib/api';
 
 interface SettingsPageProps {
   profile: UserProfile;
   onLogout: () => void;
-  onSaveProfile: (profile: UserProfile) => void;
+  onSaveProfile: (profile: UserProfile) => Promise<void>;
 }
 
 export default function SettingsPage({ profile, onLogout, onSaveProfile }: SettingsPageProps) {
@@ -14,6 +13,11 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
   const [savedMessage, setSavedMessage] = useState('');
   const [exportMessage, setExportMessage] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setFormData(profile);
+  }, [profile]);
 
   const downloadFile = (fileName: string, content: string, type: string) => {
     const blob = new Blob([content], { type });
@@ -94,16 +98,25 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const nextProfile = {
       fullName: formData.fullName.trim() || 'User',
-      email: formData.email.trim(),
+      email: formData.email?.trim() || null,
     };
 
-    setFormData(nextProfile);
-    onSaveProfile(nextProfile);
-    setSavedMessage('Settings saved successfully.');
-    window.setTimeout(() => setSavedMessage(''), 3000);
+    setIsSaving(true);
+    setSavedMessage('');
+
+    try {
+      await onSaveProfile(nextProfile);
+      setFormData(nextProfile);
+      setSavedMessage('Settings saved successfully.');
+      window.setTimeout(() => setSavedMessage(''), 3000);
+    } catch (requestError) {
+      setSavedMessage(requestError instanceof Error ? requestError.message : 'Settings could not be saved.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -200,10 +213,11 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
             {savedMessage && <p className="text-sm text-green-500">{savedMessage}</p>}
             <button
               type="button"
-              onClick={handleSave}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              disabled={isSaving}
+              onClick={() => void handleSave()}
+              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Save Changes
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </div>

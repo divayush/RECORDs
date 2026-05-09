@@ -45,3 +45,11 @@ model DashboardCache {
 
   @@index([expiresAt])
 }
+
+model UserProfile {
+  id        String   @id @default("default") @map("_id")
+  fullName  String
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

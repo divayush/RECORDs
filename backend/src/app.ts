@@ -6,6 +6,7 @@ import { errorMiddleware } from './middleware/error.middleware.js';
 import { authRouter } from './routes/auth.routes.js';
 import { dealsRouter } from './routes/deals.routes.js';
 import { healthRouter } from './routes/health.routes.js';
+import { profileRouter } from './routes/profile.routes.js';
 import { statsRouter } from './routes/stats.routes.js';
 
 export const app = express();
@@ -33,6 +34,7 @@ app.get('/', (_req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/deals', authMiddleware, dealsRouter);
+app.use('/api/profile', authMiddleware, profileRouter);
 app.use('/api/stats', authMiddleware, statsRouter);
 app.use('/api/health', healthRouter);
 app.use(errorMiddleware);

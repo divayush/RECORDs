@@ -73,6 +73,13 @@ export interface DealListResponse {
   };
 }
 
+export interface UserProfile {
+  fullName: string;
+  email: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? '' : 'http://127.0.0.1:4000');
 
 const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
@@ -109,6 +116,19 @@ export const api = {
 
   getStats: async (range: TimeRange) => {
     const response = await request<{ data: StatsResponse }>(`/api/stats?range=${range}`);
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await request<{ data: UserProfile }>('/api/profile');
+    return response.data;
+  },
+
+  updateProfile: async (profile: Pick<UserProfile, 'fullName' | 'email'>) => {
+    const response = await request<{ data: UserProfile }>('/api/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profile),
+    });
     return response.data;
   },
 

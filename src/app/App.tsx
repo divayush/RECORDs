@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardPage from './components/DashboardPage';
@@ -6,36 +6,40 @@ import DealRecordsPage from './components/DealRecordsPage';
 import AddDealPage from './components/AddDealPage';
 import SettingsPage from './components/SettingsPage';
 import LoginPage from './components/LoginPage';
-import type { Deal } from './lib/api';
-
-export interface UserProfile {
-  fullName: string;
-  email: string;
-}
+import { api, type Deal, type UserProfile } from './lib/api';
 
 const defaultProfile: UserProfile = {
-  fullName: 'Ayush',
-  email: 'Lite@convert.discord',
-};
-
-const getSavedProfile = () => {
-  const savedProfile = window.localStorage.getItem('deal-ledger-profile');
-  if (!savedProfile) return defaultProfile;
-
-  try {
-    return { ...defaultProfile, ...JSON.parse(savedProfile) } as UserProfile;
-  } catch {
-    return defaultProfile;
-  }
+  fullName: 'User',
+  email: null,
 };
 
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
   const [searchValue, setSearchValue] = useState('');
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
-  const [profile, setProfile] = useState<UserProfile>(getSavedProfile);
+  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
   const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(window.localStorage.getItem('deal-ledger-auth-token')));
   const [toastMessage, setToastMessage] = useState('');
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    let isCurrent = true;
+
+    api
+      .getProfile()
+      .then((savedProfile) => {
+        if (!isCurrent) return;
+        setProfile({ ...defaultProfile, ...savedProfile });
+      })
+      .catch(() => {
+        // Keep the local fallback if the profile endpoint is temporarily unavailable.
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [isLoggedIn]);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -92,9 +96,9 @@ export default function App() {
               setIsLoggedIn(false);
               setActivePage('dashboard');
             }}
-            onSaveProfile={(nextProfile) => {
-              setProfile(nextProfile);
-              window.localStorage.setItem('deal-ledger-profile', JSON.stringify(nextProfile));
+            onSaveProfile={async (nextProfile) => {
+              const savedProfile = await api.updateProfile(nextProfile);
+              setProfile({ ...defaultProfile, ...savedProfile });
             }}
           />
         );
