@@ -31,6 +31,7 @@ const getIstParts = (date: Date) => {
     year: istDate.getUTCFullYear(),
     month: istDate.getUTCMonth(),
     day: istDate.getUTCDate(),
+    weekday: istDate.getUTCDay(),
   };
 };
 
@@ -41,6 +42,11 @@ const startOfDay = (date: Date) => {
   const parts = getIstParts(date);
   return fromIstParts(parts.year, parts.month, parts.day);
 };
+const startOfWeek = (date: Date) => {
+  const dayStart = startOfDay(date);
+  const { weekday } = getIstParts(date);
+  return addDays(dayStart, -weekday);
+};
 const addDays = (date: Date, days: number) => new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 const addHours = (date: Date, hours: number) => new Date(date.getTime() + hours * 60 * 60 * 1000);
 const addMonths = (date: Date, months: number) => {
@@ -50,16 +56,16 @@ const addMonths = (date: Date, months: number) => {
 
 const getRangeWindow = (range: StatsRange, now = new Date()) => {
   if (range === '24h') {
-    const end = now;
-    const start = addHours(end, -24);
-    const previousStart = addHours(start, -24);
+    const start = startOfDay(now);
+    const end = addDays(start, 1);
+    const previousStart = addDays(start, -1);
 
     return { start, end, previousStart, previousEnd: start };
   }
 
   if (range === 'weekly') {
-    const end = addDays(startOfDay(now), 1);
-    const start = addDays(end, -7);
+    const start = startOfWeek(now);
+    const end = addDays(start, 7);
     const previousStart = addDays(start, -7);
 
     return { start, end, previousStart, previousEnd: start };
