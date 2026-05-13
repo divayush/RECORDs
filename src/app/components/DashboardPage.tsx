@@ -325,6 +325,7 @@ export default function DashboardPage() {
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Date</th>
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Holder</th>
+                <th className="text-left py-3 px-4 text-sm text-muted-foreground">Client</th>
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Server</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">Amount</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">Client Fee</th>
@@ -338,6 +339,7 @@ export default function DashboardPage() {
                 <tr key={deal.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                   <td className="py-3 px-4 text-sm">{formatDate(deal.dealDate)}</td>
                   <td className="py-3 px-4 text-sm">{deal.holderUsername}</td>
+                  <td className="py-3 px-4 text-sm">{deal.clientUsername ?? '-'}</td>
                   <td className="py-3 px-4 text-sm">{deal.serverName ?? '-'}</td>
                   <td className="py-3 px-4 text-sm text-right">${deal.dealAmount.toLocaleString()}</td>
                   <td className="py-3 px-4 text-sm text-right text-cyan-400">${deal.clientFee.toLocaleString()}</td>

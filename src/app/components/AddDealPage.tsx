@@ -51,6 +51,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
     serverName: deal?.serverName ?? '',
     serverFee: deal ? String(deal.serverFee) : '',
     holderUsername: deal?.holderUsername ?? '',
+    clientUsername: deal?.clientUsername ?? '',
     dealDate: deal ? toDateInputValue(deal.dealDate) : toDateInputValue(),
     notes: deal?.notes ?? '',
   });
@@ -93,6 +94,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
     if (!formData.serverName.trim()) return 'Please enter where the deal happened.';
     if (!formData.serverFee.trim()) return 'Please enter the server fee. Use 0 if there is no fee.';
     if (!formData.holderUsername.trim()) return 'Please enter the holder username.';
+    if (!formData.clientUsername.trim()) return 'Please enter the client username.';
     if (!formData.dealDate) return 'Please select the deal date.';
 
     for (const [label, value] of moneyFields) {
@@ -143,6 +145,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
         serverName: formData.serverName.trim(),
         serverFee: toNumber(formData.serverFee),
         holderUsername: formData.holderUsername.trim(),
+        clientUsername: formData.clientUsername.trim(),
         dealDate: withCurrentIndiaTime(formData.dealDate),
         notes: formData.notes.trim() || null,
       };
@@ -246,7 +249,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm mb-2">Sent What</label>
+                  <label className="block text-sm mb-2">Amount</label>
                   <input
                     type="number"
                     value={spendingData.sentWhat}
@@ -355,6 +358,19 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
             </div>
 
             <div>
+              <label className="block text-sm mb-2">Client Username</label>
+              <input
+                type="text"
+                value={formData.clientUsername}
+                onChange={(event) => handleChange('clientUsername', event.target.value)}
+                placeholder="Enter client username"
+                className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
               <label className="block text-sm mb-2">Deal Date</label>
               <div className="relative">
                 <input
@@ -366,9 +382,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
                 <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
               <label className="block text-sm mb-2">Profit in $</label>
               <input

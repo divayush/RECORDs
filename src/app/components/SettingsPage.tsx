@@ -40,6 +40,7 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
     const headers = [
       'Date',
       'Holder Username',
+      'Client Username',
       'Server',
       'Deal Amount',
       'Client Fee',
@@ -55,6 +56,7 @@ export default function SettingsPage({ profile, onLogout, onSaveProfile }: Setti
     const rows = deals.map((deal) => [
       deal.dealDate,
       deal.holderUsername,
+      deal.clientUsername,
       deal.serverName,
       deal.dealAmount,
       deal.clientFee,

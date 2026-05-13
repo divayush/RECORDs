@@ -80,7 +80,7 @@ export const validateDealCreate = (body: DealRequestBody): DealInput => ({
   clientFee: toMoneyNumber(body.clientFee, 'clientFee'),
   serverFee: toMoneyNumber(body.serverFee, 'serverFee'),
   holderUsername: toRequiredString(body.holderUsername, 'holderUsername'),
-  clientUsername: typeof body.clientUsername === 'string' ? body.clientUsername.trim() || null : null,
+  clientUsername: toRequiredString(body.clientUsername, 'clientUsername'),
   serverName: toRequiredString(body.serverName, 'serverName'),
   dealDate: toDealDate(body.dealDate),
   status: toStatus(body.status),
@@ -95,7 +95,7 @@ export const validateDealUpdate = (body: DealRequestBody): Partial<DealInput> =>
   if ('clientFee' in body) update.clientFee = toMoneyNumber(body.clientFee, 'clientFee');
   if ('serverFee' in body) update.serverFee = toMoneyNumber(body.serverFee, 'serverFee');
   if ('holderUsername' in body) update.holderUsername = toRequiredString(body.holderUsername, 'holderUsername');
-  if ('clientUsername' in body) update.clientUsername = typeof body.clientUsername === 'string' ? body.clientUsername.trim() || null : null;
+  if ('clientUsername' in body) update.clientUsername = toRequiredString(body.clientUsername, 'clientUsername');
   if ('serverName' in body) update.serverName = toRequiredString(body.serverName, 'serverName');
   if ('dealDate' in body) update.dealDate = toDealDate(body.dealDate);
   if ('status' in body) update.status = toStatus(body.status);

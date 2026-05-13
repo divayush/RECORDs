@@ -121,7 +121,7 @@ export default function RealLifeStatsPage() {
                 <th className="px-4 py-3 text-left text-sm text-muted-foreground">Date</th>
                 <th className="px-4 py-3 text-left text-sm text-muted-foreground">Sent To</th>
                 <th className="px-4 py-3 text-left text-sm text-muted-foreground">For What</th>
-                <th className="px-4 py-3 text-right text-sm text-muted-foreground">Sent What</th>
+                <th className="px-4 py-3 text-right text-sm text-muted-foreground">Amount</th>
                 <th className="px-4 py-3 text-left text-sm text-muted-foreground">Notes</th>
                 <th className="px-4 py-3 text-center text-sm text-muted-foreground">Actions</th>
               </tr>

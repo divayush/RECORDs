@@ -205,6 +205,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
                   </button>
                 </th>
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Holder Username</th>
+                <th className="text-left py-3 px-4 text-sm text-muted-foreground">Client Username</th>
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Server</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">
                   <button className="flex items-center gap-1 hover:text-foreground ml-auto">
@@ -227,6 +228,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
                 <tr key={deal.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                   <td className="py-3 px-4 text-sm">{formatDate(deal.dealDate)}</td>
                   <td className="py-3 px-4 text-sm">{deal.holderUsername}</td>
+                  <td className="py-3 px-4 text-sm">{deal.clientUsername ?? '-'}</td>
                   <td className="py-3 px-4 text-sm">{deal.serverName ?? '-'}</td>
                   <td className="py-3 px-4 text-sm text-right">${deal.dealAmount.toLocaleString()}</td>
                   <td className="py-3 px-4 text-sm text-right text-cyan-400">${deal.clientFee.toLocaleString()}</td>

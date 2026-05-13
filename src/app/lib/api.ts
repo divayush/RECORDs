@@ -46,6 +46,7 @@ export interface DealPayload {
   clientFee: number;
   serverFee: number;
   holderUsername: string;
+  clientUsername: string;
   serverName: string;
   dealDate: string;
   status?: string;

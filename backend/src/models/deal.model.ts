@@ -24,7 +24,7 @@ export interface DealInput {
   clientFee: number;
   serverFee: number;
   holderUsername: string;
-  clientUsername?: string | null;
+  clientUsername: string;
   serverName: string;
   profit?: number;
   loss?: number;
