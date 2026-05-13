@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Trash2, Wallet, ReceiptText, Tags } from 'lucide-react';
+import { Eye, Search, Trash2, Wallet, ReceiptText, Tags, X } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import KPICard from './KPICard';
 import { api, type Spending, type SpendingStatsResponse } from '../lib/api';
@@ -22,11 +22,17 @@ const formatDate = (value: string) =>
     day: '2-digit',
   });
 
+const previewText = (value: string | null) => {
+  if (!value) return '-';
+  return value.length > 34 ? `${value.slice(0, 34)}...` : value;
+};
+
 export default function RealLifeStatsPage() {
   const [stats, setStats] = useState<SpendingStatsResponse>(emptyStats);
   const [spendings, setSpendings] = useState<Spending[]>([]);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedSpending, setSelectedSpending] = useState<Spending | null>(null);
   const [error, setError] = useState('');
 
   const loadData = async () => {
@@ -133,15 +139,24 @@ export default function RealLifeStatsPage() {
                   <td className="px-4 py-3 text-sm">{spending.sentTo}</td>
                   <td className="px-4 py-3 text-sm">{spending.forWhat}</td>
                   <td className="px-4 py-3 text-right text-sm text-blue-400">{formatCurrency(spending.sentWhat)}</td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground">{spending.notes ?? '-'}</td>
+                  <td className="max-w-xs px-4 py-3 text-sm text-muted-foreground">{previewText(spending.notes)}</td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      type="button"
-                      onClick={() => void handleDelete(spending)}
-                      className="rounded p-1.5 transition-colors hover:bg-muted"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-400" />
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSpending(spending)}
+                        className="rounded p-1.5 transition-colors hover:bg-muted"
+                      >
+                        <Eye className="h-4 w-4 text-blue-400" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete(spending)}
+                        className="rounded p-1.5 transition-colors hover:bg-muted"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-400" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -155,6 +170,47 @@ export default function RealLifeStatsPage() {
           </div>
         )}
       </div>
+
+      {selectedSpending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-2xl">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-foreground">Spending Details</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{formatDate(selectedSpending.spentAt)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedSpending(null)}
+                className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-border bg-background/60 p-4 text-sm">
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Sent To</span>
+                <span className="text-foreground">{selectedSpending.sentTo}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">For What</span>
+                <span className="text-foreground">{selectedSpending.forWhat}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Amount</span>
+                <span className="text-blue-400">{formatCurrency(selectedSpending.sentWhat)}</span>
+              </div>
+              <div>
+                <p className="mb-2 text-muted-foreground">Notes</p>
+                <p className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-input-background p-3 text-foreground">
+                  {selectedSpending.notes || 'No notes added.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

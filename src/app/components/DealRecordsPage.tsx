@@ -1,4 +1,4 @@
-import { Search, Filter, Edit, Trash2, ArrowUpDown, X } from 'lucide-react';
+import { Search, Filter, Edit, Eye, Trash2, ArrowUpDown, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api, type Deal } from '../lib/api';
 
@@ -8,6 +8,11 @@ const formatDate = (value: string) =>
     month: '2-digit',
     day: '2-digit',
   });
+
+const previewText = (value: string | null) => {
+  if (!value) return '-';
+  return value.length > 28 ? `${value.slice(0, 28)}...` : value;
+};
 
 interface DealRecordsPageProps {
   onEditDeal: (deal: Deal) => void;
@@ -28,6 +33,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [dealToDelete, setDealToDelete] = useState<Deal | null>(null);
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [error, setError] = useState('');
 
   const loadDeals = async () => {
@@ -220,6 +226,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
                     Profit <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
+                <th className="text-left py-3 px-4 text-sm text-muted-foreground">Notes</th>
                 <th className="text-center py-3 px-4 text-sm text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -237,8 +244,16 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
                   <td className={`py-3 px-4 text-sm text-right ${deal.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                     ${deal.profit.toLocaleString()}
                   </td>
+                  <td className="max-w-xs py-3 px-4 text-sm text-muted-foreground">{previewText(deal.notes)}</td>
                   <td className="py-3 px-4 text-center">
                     <div className="flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDeal(deal)}
+                        className="p-1.5 hover:bg-muted rounded transition-colors"
+                      >
+                        <Eye className="w-4 h-4 text-blue-400" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => onEditDeal(deal)}
@@ -253,7 +268,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
                       >
                         <Trash2 className="w-4 h-4 text-red-400" />
                       </button>
-                      </div>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -338,6 +353,55 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
               >
                 {isDeleting ? 'Deleting...' : 'Delete Deal'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedDeal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-2xl">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-foreground">Deal Details</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{formatDate(selectedDeal.dealDate)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDeal(null)}
+                className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-border bg-background/60 p-4 text-sm">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-muted-foreground">Holder</p>
+                  <p className="text-foreground">{selectedDeal.holderUsername}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Client</p>
+                  <p className="text-foreground">{selectedDeal.clientUsername ?? '-'}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Server</p>
+                  <p className="text-foreground">{selectedDeal.serverName ?? '-'}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Profit</p>
+                  <p className={selectedDeal.profit >= 0 ? 'text-green-500' : 'text-red-500'}>
+                    ${selectedDeal.profit.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-muted-foreground">Notes</p>
+                <p className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-input-background p-3 text-foreground">
+                  {selectedDeal.notes || 'No notes added.'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
