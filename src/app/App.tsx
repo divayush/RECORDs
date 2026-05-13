@@ -4,6 +4,7 @@ import Header from './components/Header';
 import DashboardPage from './components/DashboardPage';
 import DealRecordsPage from './components/DealRecordsPage';
 import AddDealPage from './components/AddDealPage';
+import RealLifeStatsPage from './components/RealLifeStatsPage';
 import SettingsPage from './components/SettingsPage';
 import LoginPage from './components/LoginPage';
 import { api, type Deal, type UserProfile } from './lib/api';
@@ -68,6 +69,8 @@ export default function App() {
     switch (activePage) {
       case 'dashboard':
         return <DashboardPage />;
+      case 'life-stats':
+        return <RealLifeStatsPage />;
       case 'records':
         return <DealRecordsPage onEditDeal={handleEditDeal} searchTerm={searchValue} onSearchChange={setSearchValue} />;
       case 'add-deal':
@@ -78,7 +81,7 @@ export default function App() {
             onSaved={(message) => {
               const wasEditing = Boolean(editingDeal);
               setEditingDeal(null);
-              setActivePage(wasEditing ? 'records' : 'dashboard');
+              setActivePage(message.includes('Spending') ? 'life-stats' : wasEditing ? 'records' : 'dashboard');
               showToast(message);
             }}
             onCancel={() => {

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Database, PlusCircle, Settings } from 'lucide-react';
+import { LayoutDashboard, Database, PlusCircle, Settings, ReceiptText } from 'lucide-react';
 
 interface SidebarProps {
   activePage: string;
@@ -15,6 +15,7 @@ const getInitials = (name: string) => {
 export default function Sidebar({ activePage, onNavigate, profileName }: SidebarProps) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'life-stats', label: 'Real Life', icon: ReceiptText },
     { id: 'records', label: 'Deal Records', icon: Database },
     { id: 'add-deal', label: 'Add New Deal', icon: PlusCircle },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -27,7 +28,7 @@ export default function Sidebar({ activePage, onNavigate, profileName }: Sidebar
         <p className="text-sm text-muted-foreground mt-1">Finance Tracker</p>
       </div>
 
-      <nav className="grid grid-cols-4 gap-1 p-2 md:block md:flex-1 md:p-4">
+      <nav className="grid grid-cols-5 gap-1 p-2 md:block md:flex-1 md:p-4">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activePage === item.id;

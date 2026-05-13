@@ -80,6 +80,44 @@ export interface UserProfile {
   updatedAt?: string;
 }
 
+export interface Spending {
+  id: string;
+  sentTo: string;
+  forWhat: string;
+  sentWhat: number;
+  notes: string | null;
+  spentAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SpendingPayload {
+  sentTo: string;
+  forWhat: string;
+  sentWhat: number;
+  notes: string | null;
+  spentAt: string;
+}
+
+export interface SpendingListResponse {
+  data: Spending[];
+  meta: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface SpendingStatsResponse {
+  totals: {
+    spent: number;
+    records: number;
+  };
+  byPurpose: { name: string; amount: number }[];
+  recentSpendings: Spending[];
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? '' : 'http://127.0.0.1:4000');
 
 const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
@@ -175,6 +213,38 @@ export const api = {
 
   deleteDeal: async (id: string) => {
     await request<void>(`/api/deals?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+
+  createSpending: async (payload: SpendingPayload) => {
+    const response = await request<{ data: Spending }>('/api/spendings', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return response.data;
+  },
+
+  getSpendings: async (params: { page?: number; pageSize?: number; search?: string } = {}) => {
+    const searchParams = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        searchParams.set(key, String(value));
+      }
+    });
+
+    const query = searchParams.toString();
+    return request<SpendingListResponse>(`/api/spendings${query ? `?${query}` : ''}`);
+  },
+
+  getSpendingStats: async () => {
+    const response = await request<{ data: SpendingStatsResponse }>('/api/spendings/stats');
+    return response.data;
+  },
+
+  deleteSpending: async (id: string) => {
+    await request<void>(`/api/spendings?id=${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
   },

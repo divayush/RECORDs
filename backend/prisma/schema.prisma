@@ -56,3 +56,18 @@ model UserProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Spending {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  sentTo    String
+  forWhat   String
+  sentWhat  Int
+  notes     String?
+  spentAt   DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([spentAt])
+  @@index([sentTo])
+  @@index([forWhat])
+}

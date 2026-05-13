@@ -41,6 +41,7 @@ const toNumber = (value: string) => Number(value || 0);
 
 export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProps) {
   const isEditing = Boolean(deal);
+  const [mode, setMode] = useState<'main' | 'life'>(deal ? 'main' : 'main');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -53,6 +54,13 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
     dealDate: deal ? toDateInputValue(deal.dealDate) : toDateInputValue(),
     notes: deal?.notes ?? '',
   });
+  const [spendingData, setSpendingData] = useState({
+    sentTo: '',
+    forWhat: '',
+    sentWhat: '',
+    spentAt: toDateInputValue(),
+    notes: '',
+  });
 
   const calculatedProfit = useMemo(
     () => toNumber(formData.clientFee) - (toNumber(formData.holderFee) + toNumber(formData.serverFee)),
@@ -60,6 +68,18 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
   );
 
   const validateForm = () => {
+    if (mode === 'life') {
+      if (!spendingData.sentTo.trim()) return 'Please enter who you sent it to.';
+      if (!spendingData.forWhat.trim()) return 'Please enter what it was for.';
+      if (!spendingData.sentWhat.trim()) return 'Please enter what amount was sent.';
+      if (!spendingData.spentAt) return 'Please select the spending date.';
+
+      const amount = Number(spendingData.sentWhat);
+      if (Number.isNaN(amount) || amount < 0) return 'Sent what must be a valid number of 0 or more.';
+
+      return '';
+    }
+
     const moneyFields = [
       ['Deal Amount', formData.dealAmount],
       ['Client Fee', formData.clientFee],
@@ -98,6 +118,24 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
     setIsSaving(true);
 
     try {
+      if (mode === 'life') {
+        await api.createSpending({
+          sentTo: spendingData.sentTo.trim(),
+          forWhat: spendingData.forWhat.trim(),
+          sentWhat: toNumber(spendingData.sentWhat),
+          spentAt: withCurrentIndiaTime(spendingData.spentAt),
+          notes: spendingData.notes.trim() || null,
+        });
+
+        if (onSaved) {
+          onSaved('Spending record saved successfully.');
+        } else {
+          onCancel();
+        }
+
+        return;
+      }
+
       const payload = {
         dealAmount: toNumber(formData.dealAmount),
         clientFee: toNumber(formData.clientFee),
@@ -131,6 +169,10 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSpendingChange = (field: string, value: string) => {
+    setSpendingData((prev) => ({ ...prev, [field]: value }));
+  };
+
   return (
     <div className="flex-1 overflow-auto p-4 md:p-6">
       <div className="max-w-3xl mx-auto mb-6">
@@ -140,7 +182,35 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="max-w-3xl mx-auto">
+      <div className="mx-auto grid max-w-5xl gap-4 md:grid-cols-[180px_1fr]">
+        <div className="h-fit rounded-lg border border-border bg-card p-3">
+          <button
+            type="button"
+            disabled={isEditing}
+            onClick={() => setMode('main')}
+            className={`mb-2 w-full rounded-lg px-4 py-3 text-left text-sm transition-colors ${
+              mode === 'main'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+            } disabled:cursor-not-allowed disabled:opacity-70`}
+          >
+            Main Page
+          </button>
+          <button
+            type="button"
+            disabled={isEditing}
+            onClick={() => setMode('life')}
+            className={`w-full rounded-lg px-4 py-3 text-left text-sm transition-colors ${
+              mode === 'life'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+            } disabled:cursor-not-allowed disabled:opacity-70`}
+          >
+            In Real Life
+          </button>
+        </div>
+
+      <form onSubmit={handleSubmit} noValidate>
         <div className="bg-card border border-border rounded-lg p-6">
           {error && (
             <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -148,6 +218,71 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
             </div>
           )}
 
+          {mode === 'life' ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm mb-2">Sent To Whom</label>
+                  <input
+                    type="text"
+                    value={spendingData.sentTo}
+                    onChange={(event) => handleSpendingChange('sentTo', event.target.value)}
+                    placeholder="Enter name or username"
+                    className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm mb-2">For What</label>
+                  <input
+                    type="text"
+                    value={spendingData.forWhat}
+                    onChange={(event) => handleSpendingChange('forWhat', event.target.value)}
+                    placeholder="Food, travel, rent..."
+                    className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm mb-2">Sent What</label>
+                  <input
+                    type="number"
+                    value={spendingData.sentWhat}
+                    onChange={(event) => handleSpendingChange('sentWhat', event.target.value)}
+                    placeholder="0.00"
+                    className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm mb-2">Date</label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={spendingData.spentAt}
+                      onChange={(event) => handleSpendingChange('spentAt', event.target.value)}
+                      className="date-input-clean w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm mb-2">Notes</label>
+                <textarea
+                  value={spendingData.notes}
+                  onChange={(event) => handleSpendingChange('notes', event.target.value)}
+                  placeholder="Add any notes about this spending..."
+                  rows={4}
+                  className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+              </div>
+            </>
+          ) : (
+            <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
               <label className="block text-sm mb-2">Deal Amount</label>
@@ -259,6 +394,8 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
               className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring resize-none"
             />
           </div>
+            </>
+          )}
 
           <div className="grid grid-cols-1 gap-3 sm:flex">
             <button
@@ -267,7 +404,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
               className="flex items-center justify-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               <Save className="w-4 h-4" />
-              <span>{isSaving ? 'Saving...' : isEditing ? 'Update Deal' : 'Save Deal'}</span>
+              <span>{isSaving ? 'Saving...' : isEditing ? 'Update Deal' : mode === 'life' ? 'Save Spending' : 'Save Deal'}</span>
             </button>
 
             <button
@@ -281,6 +418,7 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
           </div>
         </div>
 
+        {mode === 'main' && (
         <div className="mt-6 bg-card border border-border rounded-lg p-6">
           <h3 className="text-foreground mb-4">Deal Summary</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -306,7 +444,9 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
             </div>
           </div>
         </div>
+        )}
       </form>
+      </div>
     </div>
   );
 }
