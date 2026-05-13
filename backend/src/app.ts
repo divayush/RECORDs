@@ -12,10 +12,17 @@ import { statsRouter } from './routes/stats.routes.js';
 
 export const app = express();
 
+const builtInFrontendOrigins = new Set(['https://liteswap.org', 'https://www.liteswap.org']);
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || env.frontendOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      if (
+        !origin ||
+        env.frontendOrigins.includes(origin) ||
+        builtInFrontendOrigins.has(origin) ||
+        origin.endsWith('.vercel.app')
+      ) {
         callback(null, true);
         return;
       }
