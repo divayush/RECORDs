@@ -4,7 +4,8 @@ import type { DealResponse } from '../models/deal.model.js';
 import type { ChartPoint, StatsRange, StatsResponse } from '../models/stats.model.js';
 
 const centsToMoney = (value: number) => value / 100;
-const getCalculatedProfitCents = (deal: Deal) => deal.clientFee - deal.holderFee - (deal.serverFee ?? 0);
+const getCalculatedProfitCents = (deal: Deal) =>
+  deal.dealAmount - deal.clientFee - (deal.serverFee ?? 0) - deal.holderFee;
 const INDIA_TIME_ZONE = 'Asia/Kolkata';
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 const CACHE_TTL_MS = 60 * 1000;

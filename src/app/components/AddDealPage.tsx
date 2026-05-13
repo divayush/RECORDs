@@ -55,8 +55,12 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
   });
 
   const calculatedProfit = useMemo(
-    () => toNumber(formData.clientFee) - toNumber(formData.holderFee) - toNumber(formData.serverFee),
-    [formData.clientFee, formData.holderFee, formData.serverFee],
+    () =>
+      toNumber(formData.dealAmount) -
+      toNumber(formData.clientFee) -
+      toNumber(formData.serverFee) -
+      toNumber(formData.holderFee),
+    [formData.clientFee, formData.dealAmount, formData.holderFee, formData.serverFee],
   );
 
   const validateForm = () => {
@@ -285,14 +289,14 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
           <h3 className="text-foreground mb-4">Deal Summary</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Client Fee</p>
-              <p className="text-foreground">${toNumber(formData.clientFee).toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground mb-1">Total Fees</p>
+              <p className="text-foreground">
+                ${(toNumber(formData.clientFee) + toNumber(formData.holderFee) + toNumber(formData.serverFee)).toLocaleString()}
+              </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Cost Fees</p>
-              <p className="text-foreground">
-                ${(toNumber(formData.holderFee) + toNumber(formData.serverFee)).toLocaleString()}
-              </p>
+              <p className="text-sm text-muted-foreground mb-1">After Fees</p>
+              <p className="text-foreground">${calculatedProfit.toLocaleString()}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground mb-1">Profit</p>
