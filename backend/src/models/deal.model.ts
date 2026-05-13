@@ -5,8 +5,10 @@ export interface DealResponse {
   dealAmount: number;
   holderFee: number;
   clientFee: number;
+  serverFee: number;
   holderUsername: string;
-  clientUsername: string;
+  clientUsername: string | null;
+  serverName: string | null;
   profit: number;
   loss: number;
   dealDate: string;
@@ -20,8 +22,10 @@ export interface DealInput {
   dealAmount: number;
   holderFee: number;
   clientFee: number;
+  serverFee: number;
   holderUsername: string;
-  clientUsername: string;
+  clientUsername?: string | null;
+  serverName: string;
   profit?: number;
   loss?: number;
   dealDate: Date;

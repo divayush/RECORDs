@@ -4,6 +4,7 @@ import type { DealResponse } from '../models/deal.model.js';
 import type { ChartPoint, StatsRange, StatsResponse } from '../models/stats.model.js';
 
 const centsToMoney = (value: number) => value / 100;
+const getCalculatedProfitCents = (deal: Deal) => deal.clientFee - deal.holderFee - (deal.serverFee ?? 0);
 const INDIA_TIME_ZONE = 'Asia/Kolkata';
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
 const CACHE_TTL_MS = 60 * 1000;
@@ -13,10 +14,12 @@ const serializeDeal = (deal: Deal): DealResponse => ({
   dealAmount: centsToMoney(deal.dealAmount),
   holderFee: centsToMoney(deal.holderFee),
   clientFee: centsToMoney(deal.clientFee),
+  serverFee: centsToMoney(deal.serverFee ?? 0),
   holderUsername: deal.holderUsername,
   clientUsername: deal.clientUsername,
-  profit: centsToMoney(deal.profit),
-  loss: centsToMoney(deal.loss),
+  serverName: deal.serverName,
+  profit: centsToMoney(getCalculatedProfitCents(deal)),
+  loss: 0,
   dealDate: deal.dealDate.toISOString(),
   status: deal.status,
   notes: deal.notes,
@@ -146,21 +149,21 @@ const formatBucketLabel = (range: StatsRange, date: Date) => {
 const sumDeals = (deals: Deal[]) =>
   deals.reduce(
     (totals, deal) => ({
-      profit: totals.profit + deal.profit,
-      loss: totals.loss + deal.loss,
+      profit: totals.profit + getCalculatedProfitCents(deal),
       volume: totals.volume + deal.dealAmount,
       dealAmount: totals.dealAmount + deal.dealAmount,
       holderFees: totals.holderFees + deal.holderFee,
       clientFees: totals.clientFees + deal.clientFee,
+      serverFees: totals.serverFees + (deal.serverFee ?? 0),
       deals: totals.deals + 1,
     }),
     {
       profit: 0,
-      loss: 0,
       volume: 0,
       dealAmount: 0,
       holderFees: 0,
       clientFees: 0,
+      serverFees: 0,
       deals: 0,
     },
   );
@@ -177,12 +180,12 @@ const getChartDate = (deal: Deal) => {
 
 const toMoneyTotals = (totals: ReturnType<typeof sumDeals>) => ({
   profit: centsToMoney(totals.profit),
-  loss: centsToMoney(totals.loss),
-  netProfit: centsToMoney(totals.profit - totals.loss),
+  netProfit: centsToMoney(totals.profit),
   volume: centsToMoney(totals.volume),
   dealAmount: centsToMoney(totals.dealAmount),
   holderFees: centsToMoney(totals.holderFees),
   clientFees: centsToMoney(totals.clientFees),
+  serverFees: centsToMoney(totals.serverFees),
   deals: totals.deals,
 });
 
@@ -214,7 +217,7 @@ const buildChartPoints = (range: StatsRange, deals: Deal[], start: Date, end: Da
       .forEach((deal) => {
         const label = formatBucketLabel(range, getChartDate(deal));
         const point = pointsByLabel.get(label) ?? { label, profit: 0, volume: 0 };
-        point.profit += centsToMoney(deal.profit);
+        point.profit += centsToMoney(getCalculatedProfitCents(deal));
         point.volume += centsToMoney(deal.dealAmount);
         pointsByLabel.set(label, point);
       });
@@ -296,7 +299,6 @@ export const statsService = {
       totals: moneyTotals,
       trends: {
         profit: trend(moneyTotals.profit, previousMoneyTotals.profit),
-        loss: trend(moneyTotals.loss, previousMoneyTotals.loss),
         netProfit: trend(moneyTotals.netProfit, previousMoneyTotals.netProfit),
       },
       profitOverTime: chartPoints,

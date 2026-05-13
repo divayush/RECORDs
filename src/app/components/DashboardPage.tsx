@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, TrendingUp, TrendingDown, BarChart3, FileText, Users, Wallet } from 'lucide-react';
+import { DollarSign, TrendingUp, BarChart3, FileText, Users, Wallet, Server } from 'lucide-react';
 import KPICard from './KPICard';
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
-import { api, type Deal, type StatsResponse, type TimeRange } from '../lib/api';
+import { api, type StatsResponse, type TimeRange } from '../lib/api';
 
 const timeRangeOptions: { id: TimeRange; label: string }[] = [
   { id: '24h', label: '24 Hours' },
@@ -15,17 +15,16 @@ const emptyStats: StatsResponse = {
   range: 'yearly',
   totals: {
     profit: 0,
-    loss: 0,
     netProfit: 0,
     volume: 0,
     dealAmount: 0,
     holderFees: 0,
     clientFees: 0,
+    serverFees: 0,
     deals: 0,
   },
   trends: {
     profit: { value: '0.0%', up: false },
-    loss: { value: '0.0%', up: false },
     netProfit: { value: '0.0%', up: false },
   },
   profitOverTime: [],
@@ -35,7 +34,6 @@ const emptyStats: StatsResponse = {
 
 const COLORS = {
   profit: '#10b981',
-  loss: '#ef4444',
   blue: '#3b82f6',
   purple: '#a855f7',
   cyan: '#06b6d4',
@@ -56,8 +54,6 @@ const formatDate = (value: string) =>
     month: '2-digit',
     day: '2-digit',
   });
-
-const formatStatus = (status: Deal['status']) => status.charAt(0) + status.slice(1).toLowerCase();
 
 type PieTooltipProps = {
   active?: boolean;
@@ -111,21 +107,24 @@ export default function DashboardPage() {
     };
   }, [activeRange]);
 
-  const pieTotal = stats.totals.profit + stats.totals.loss;
+  const costFees = stats.totals.holderFees + stats.totals.serverFees;
+  const pieTotal = Math.max(stats.totals.profit, 0) + costFees;
   const pieData =
     pieTotal > 0
       ? [
-          { name: 'Profit', value: stats.totals.profit },
-          { name: 'Loss', value: stats.totals.loss },
+          { name: 'Net Profit', value: Math.max(stats.totals.profit, 0) },
+          { name: 'Holder Fee', value: stats.totals.holderFees },
+          { name: 'Server Fee', value: stats.totals.serverFees },
         ]
+          .filter((item) => item.value > 0)
       : [{ name: 'No Data', value: 1 }];
-  const feeTotal = stats.totals.holderFees + stats.totals.clientFees + stats.totals.netProfit;
+  const feeTotal = stats.totals.holderFees + stats.totals.clientFees + stats.totals.serverFees;
   const feeBreakdownData =
     feeTotal > 0
       ? [
-          { name: 'Holder Fee', value: stats.totals.holderFees },
           { name: 'Client Fee', value: stats.totals.clientFees },
-          { name: 'Net Profit', value: Math.max(stats.totals.netProfit, 0) },
+          { name: 'Holder Fee', value: stats.totals.holderFees },
+          { name: 'Server Fee', value: stats.totals.serverFees },
         ].filter((item) => item.value > 0)
       : [{ name: 'No Data', value: 1 }];
 
@@ -175,35 +174,40 @@ export default function DashboardPage() {
           color="green"
         />
         <KPICard
-          title="Total Loss"
-          value={formatCurrency(stats.totals.loss)}
-          icon={TrendingDown}
-          color="red"
+          title="Total Volume"
+          value={formatCurrency(stats.totals.volume)}
+          icon={BarChart3}
+          color="purple"
         />
+        <KPICard
+          title="Total Deal Amount"
+          value={formatCurrency(stats.totals.dealAmount)}
+          icon={Wallet}
+          color="cyan"
+        />
+        <KPICard
+          title="Number of Deals"
+          value={stats.totals.deals.toLocaleString()}
+          icon={FileText}
+          color="default"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <KPICard
           title="Net Profit"
           value={formatCurrency(stats.totals.netProfit)}
           icon={DollarSign}
           color="blue"
         />
-        <KPICard
-          title="Total Volume"
-          value={formatCurrency(stats.totals.volume)}
-          icon={BarChart3}
-          color="purple"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Total Deal Amount" value={formatCurrency(stats.totals.dealAmount)} icon={Wallet} color="cyan" />
-        <KPICard title="Total Holder Fees" value={formatCurrency(stats.totals.holderFees)} icon={Users} color="purple" />
         <KPICard title="Total Client Fees" value={formatCurrency(stats.totals.clientFees)} icon={FileText} color="cyan" />
-        <KPICard title="Number of Deals" value={stats.totals.deals.toLocaleString()} icon={FileText} color="default" />
+        <KPICard title="Total Holder Fees" value={formatCurrency(stats.totals.holderFees)} icon={Users} color="purple" />
+        <KPICard title="Total Server Fees" value={formatCurrency(stats.totals.serverFees)} icon={Server} color="blue" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className="bg-card border border-border rounded-lg p-4 md:p-5">
-          <h3 className="text-foreground mb-4">Profit vs Loss</h3>
+          <h3 className="text-foreground mb-4">Profit Breakdown</h3>
           <ResponsiveContainer width="100%" height={240}>
             <PieChart margin={{ top: 18, right: 18, bottom: 8, left: 18 }}>
               <Pie
@@ -221,7 +225,7 @@ export default function DashboardPage() {
                 {pieData.map((entry, index) => (
                   <Cell
                     key={`cell-${entry.name}`}
-                    fill={pieTotal === 0 ? COLORS.muted : index === 0 ? COLORS.profit : COLORS.loss}
+                    fill={pieTotal === 0 ? COLORS.muted : index === 0 ? COLORS.profit : index === 1 ? COLORS.purple : COLORS.blue}
                   />
                 ))}
               </Pie>
@@ -321,11 +325,12 @@ export default function DashboardPage() {
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Date</th>
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Holder</th>
-                <th className="text-left py-3 px-4 text-sm text-muted-foreground">Client</th>
+                <th className="text-left py-3 px-4 text-sm text-muted-foreground">Server</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">Amount</th>
+                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Client Fee</th>
+                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Holder Fee</th>
+                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Server Fee</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">Profit</th>
-                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Loss</th>
-                <th className="text-center py-3 px-4 text-sm text-muted-foreground">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -333,26 +338,13 @@ export default function DashboardPage() {
                 <tr key={deal.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                   <td className="py-3 px-4 text-sm">{formatDate(deal.dealDate)}</td>
                   <td className="py-3 px-4 text-sm">{deal.holderUsername}</td>
-                  <td className="py-3 px-4 text-sm">{deal.clientUsername}</td>
+                  <td className="py-3 px-4 text-sm">{deal.serverName ?? '-'}</td>
                   <td className="py-3 px-4 text-sm text-right">${deal.dealAmount.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-sm text-right text-green-500">
-                    {deal.profit > 0 ? `$${deal.profit.toLocaleString()}` : '-'}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-right text-red-500">
-                    {deal.loss > 0 ? `$${deal.loss.toLocaleString()}` : '-'}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs ${
-                        deal.status === 'PROFIT'
-                          ? 'bg-green-500/10 text-green-500'
-                          : deal.status === 'LOSS'
-                            ? 'bg-red-500/10 text-red-500'
-                            : 'bg-yellow-500/10 text-yellow-500'
-                      }`}
-                    >
-                      {formatStatus(deal.status)}
-                    </span>
+                  <td className="py-3 px-4 text-sm text-right text-cyan-400">${deal.clientFee.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-sm text-right text-purple-400">${deal.holderFee.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-sm text-right text-blue-400">${deal.serverFee.toLocaleString()}</td>
+                  <td className={`py-3 px-4 text-sm text-right ${deal.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    ${deal.profit.toLocaleString()}
                   </td>
                 </tr>
               ))}

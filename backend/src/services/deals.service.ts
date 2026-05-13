@@ -5,16 +5,20 @@ import { statsService } from './stats.service.js';
 
 const moneyToCents = (value: number) => Math.round(value * 100);
 const centsToMoney = (value: number) => value / 100;
+const calculateProfit = (clientFee: number, holderFee: number, serverFee: number) => clientFee - holderFee - serverFee;
+const getCalculatedProfitCents = (deal: Deal) => deal.clientFee - deal.holderFee - (deal.serverFee ?? 0);
 
 const serializeDeal = (deal: Deal): DealResponse => ({
   id: deal.id,
   dealAmount: centsToMoney(deal.dealAmount),
   holderFee: centsToMoney(deal.holderFee),
   clientFee: centsToMoney(deal.clientFee),
+  serverFee: centsToMoney(deal.serverFee ?? 0),
   holderUsername: deal.holderUsername,
   clientUsername: deal.clientUsername,
-  profit: centsToMoney(deal.profit),
-  loss: centsToMoney(deal.loss),
+  serverName: deal.serverName,
+  profit: centsToMoney(getCalculatedProfitCents(deal)),
+  loss: 0,
   dealDate: deal.dealDate.toISOString(),
   status: deal.status,
   notes: deal.notes,
@@ -26,28 +30,38 @@ const toCreateData = (input: DealInput): Prisma.DealCreateInput => ({
   dealAmount: moneyToCents(input.dealAmount),
   holderFee: moneyToCents(input.holderFee),
   clientFee: moneyToCents(input.clientFee),
+  serverFee: moneyToCents(input.serverFee),
   holderUsername: input.holderUsername,
   clientUsername: input.clientUsername,
-  profit: moneyToCents(input.profit ?? 0),
-  loss: moneyToCents(input.loss ?? 0),
+  serverName: input.serverName,
+  profit: moneyToCents(calculateProfit(input.clientFee, input.holderFee, input.serverFee)),
+  loss: 0,
   dealDate: input.dealDate,
-  status: input.status,
+  status: input.status ?? (calculateProfit(input.clientFee, input.holderFee, input.serverFee) >= 0 ? 'PROFIT' : 'LOSS'),
   notes: input.notes,
 });
 
-const toUpdateData = (input: Partial<DealInput>): Prisma.DealUpdateInput => {
+const toUpdateData = (input: Partial<DealInput>, currentDeal: Deal): Prisma.DealUpdateInput => {
   const data: Prisma.DealUpdateInput = {};
 
   if (input.dealAmount !== undefined) data.dealAmount = moneyToCents(input.dealAmount);
   if (input.holderFee !== undefined) data.holderFee = moneyToCents(input.holderFee);
   if (input.clientFee !== undefined) data.clientFee = moneyToCents(input.clientFee);
+  if (input.serverFee !== undefined) data.serverFee = moneyToCents(input.serverFee);
   if (input.holderUsername !== undefined) data.holderUsername = input.holderUsername;
   if (input.clientUsername !== undefined) data.clientUsername = input.clientUsername;
-  if (input.profit !== undefined) data.profit = moneyToCents(input.profit);
-  if (input.loss !== undefined) data.loss = moneyToCents(input.loss);
+  if (input.serverName !== undefined) data.serverName = input.serverName;
   if (input.dealDate !== undefined) data.dealDate = input.dealDate;
-  if (input.status !== undefined) data.status = input.status;
   if (input.notes !== undefined) data.notes = input.notes;
+
+  const nextClientFee = input.clientFee !== undefined ? moneyToCents(input.clientFee) : currentDeal.clientFee;
+  const nextHolderFee = input.holderFee !== undefined ? moneyToCents(input.holderFee) : currentDeal.holderFee;
+  const nextServerFee = input.serverFee !== undefined ? moneyToCents(input.serverFee) : currentDeal.serverFee ?? 0;
+  const nextProfit = nextClientFee - nextHolderFee - nextServerFee;
+
+  data.profit = nextProfit;
+  data.loss = 0;
+  data.status = input.status ?? (nextProfit >= 0 ? 'PROFIT' : 'LOSS');
 
   return data;
 };
@@ -65,6 +79,7 @@ const toWhere = (query: DealListQuery): Prisma.DealWhereInput => {
       OR: [
         { holderUsername: { contains: query.search } },
         { clientUsername: { contains: query.search } },
+        { serverName: { contains: query.search } },
         { notes: { contains: query.search } },
       ],
     });
@@ -137,9 +152,12 @@ export const dealsService = {
   },
 
   async update(id: string, input: Partial<DealInput>) {
+    const currentDeal = await prisma.deal.findUniqueOrThrow({
+      where: { id },
+    });
     const deal = await prisma.deal.update({
       where: { id },
-      data: toUpdateData(input),
+      data: toUpdateData(input, currentDeal),
     });
 
     await statsService.clearCache();

@@ -6,8 +6,10 @@ export interface Deal {
   dealAmount: number;
   holderFee: number;
   clientFee: number;
+  serverFee: number;
   holderUsername: string;
-  clientUsername: string;
+  clientUsername: string | null;
+  serverName: string | null;
   profit: number;
   loss: number;
   dealDate: string;
@@ -21,17 +23,16 @@ export interface StatsResponse {
   range: TimeRange;
   totals: {
     profit: number;
-    loss: number;
     netProfit: number;
     volume: number;
     dealAmount: number;
     holderFees: number;
     clientFees: number;
+    serverFees: number;
     deals: number;
   };
   trends: {
     profit: { value: string; up: boolean };
-    loss: { value: string; up: boolean };
     netProfit: { value: string; up: boolean };
   };
   profitOverTime: { label: string; profit: number; volume: number }[];
@@ -43,12 +44,11 @@ export interface DealPayload {
   dealAmount: number;
   holderFee: number;
   clientFee: number;
+  serverFee: number;
   holderUsername: string;
-  clientUsername: string;
-  profit: number;
-  loss: number;
+  serverName: string;
   dealDate: string;
-  status: string;
+  status?: string;
   notes: string | null;
 }
 

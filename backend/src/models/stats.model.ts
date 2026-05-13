@@ -12,17 +12,16 @@ export interface StatsResponse {
   range: StatsRange;
   totals: {
     profit: number;
-    loss: number;
     netProfit: number;
     volume: number;
     dealAmount: number;
     holderFees: number;
     clientFees: number;
+    serverFees: number;
     deals: number;
   };
   trends: {
     profit: { value: string; up: boolean };
-    loss: { value: string; up: boolean };
     netProfit: { value: string; up: boolean };
   };
   profitOverTime: ChartPoint[];

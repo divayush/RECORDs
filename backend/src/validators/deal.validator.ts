@@ -78,10 +78,10 @@ export const validateDealCreate = (body: DealRequestBody): DealInput => ({
   dealAmount: toMoneyNumber(body.dealAmount, 'dealAmount'),
   holderFee: toMoneyNumber(body.holderFee, 'holderFee'),
   clientFee: toMoneyNumber(body.clientFee, 'clientFee'),
+  serverFee: toMoneyNumber(body.serverFee, 'serverFee'),
   holderUsername: toRequiredString(body.holderUsername, 'holderUsername'),
-  clientUsername: toRequiredString(body.clientUsername, 'clientUsername'),
-  profit: toMoneyNumber(body.profit, 'profit', false) ?? 0,
-  loss: toMoneyNumber(body.loss, 'loss', false) ?? 0,
+  clientUsername: typeof body.clientUsername === 'string' ? body.clientUsername.trim() || null : null,
+  serverName: toRequiredString(body.serverName, 'serverName'),
   dealDate: toDealDate(body.dealDate),
   status: toStatus(body.status),
   notes: toOptionalString(body.notes),
@@ -93,10 +93,10 @@ export const validateDealUpdate = (body: DealRequestBody): Partial<DealInput> =>
   if ('dealAmount' in body) update.dealAmount = toMoneyNumber(body.dealAmount, 'dealAmount');
   if ('holderFee' in body) update.holderFee = toMoneyNumber(body.holderFee, 'holderFee');
   if ('clientFee' in body) update.clientFee = toMoneyNumber(body.clientFee, 'clientFee');
+  if ('serverFee' in body) update.serverFee = toMoneyNumber(body.serverFee, 'serverFee');
   if ('holderUsername' in body) update.holderUsername = toRequiredString(body.holderUsername, 'holderUsername');
-  if ('clientUsername' in body) update.clientUsername = toRequiredString(body.clientUsername, 'clientUsername');
-  if ('profit' in body) update.profit = toMoneyNumber(body.profit, 'profit');
-  if ('loss' in body) update.loss = toMoneyNumber(body.loss, 'loss');
+  if ('clientUsername' in body) update.clientUsername = typeof body.clientUsername === 'string' ? body.clientUsername.trim() || null : null;
+  if ('serverName' in body) update.serverName = toRequiredString(body.serverName, 'serverName');
   if ('dealDate' in body) update.dealDate = toDealDate(body.dealDate);
   if ('status' in body) update.status = toStatus(body.status);
   if ('notes' in body) update.notes = toOptionalString(body.notes);

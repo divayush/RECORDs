@@ -18,8 +18,10 @@ model Deal {
   dealAmount     Int
   holderFee      Int
   clientFee      Int
+  serverFee      Int?       @default(0)
   holderUsername String
-  clientUsername String
+  clientUsername String?
+  serverName     String?
   profit         Int        @default(0)
   loss           Int        @default(0)
   dealDate       DateTime
@@ -32,6 +34,7 @@ model Deal {
   @@index([status])
   @@index([holderUsername])
   @@index([clientUsername])
+  @@index([serverName])
 }
 
 model DashboardCache {

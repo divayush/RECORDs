@@ -9,8 +9,6 @@ const formatDate = (value: string) =>
     day: '2-digit',
   });
 
-const formatStatus = (status: Deal['status']) => status.charAt(0) + status.slice(1).toLowerCase();
-
 interface DealRecordsPageProps {
   onEditDeal: (deal: Deal) => void;
   searchTerm: string;
@@ -19,7 +17,6 @@ interface DealRecordsPageProps {
 
 export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange }: DealRecordsPageProps) {
   const [deals, setDeals] = useState<Deal[]>([]);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'PROFIT' | 'LOSS' | 'PENDING'>('all');
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -42,7 +39,6 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
         page,
         pageSize: 25,
         search: searchTerm,
-        status: statusFilter,
         dateFrom,
         dateTo,
         minAmount,
@@ -60,11 +56,11 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
 
   useEffect(() => {
     void loadDeals();
-  }, [page, searchTerm, statusFilter, dateFrom, dateTo, minAmount, maxAmount]);
+  }, [page, searchTerm, dateFrom, dateTo, minAmount, maxAmount]);
 
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, statusFilter, dateFrom, dateTo, minAmount, maxAmount]);
+  }, [searchTerm, dateFrom, dateTo, minAmount, maxAmount]);
 
   const handleDelete = (deal: Deal) => {
     setDealToDelete(deal);
@@ -116,23 +112,12 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by holder, client, or notes..."
+            placeholder="Search by holder, server, or notes..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as 'all' | 'PROFIT' | 'LOSS' | 'PENDING')}
-          className="w-full px-4 py-2 bg-input-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-ring lg:w-auto"
-        >
-          <option value="all">All Status</option>
-          <option value="PROFIT">Profit</option>
-          <option value="LOSS">Loss</option>
-          <option value="PENDING">Pending</option>
-        </select>
 
         <button
           type="button"
@@ -220,83 +205,56 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
                   </button>
                 </th>
                 <th className="text-left py-3 px-4 text-sm text-muted-foreground">Holder Username</th>
-                <th className="text-left py-3 px-4 text-sm text-muted-foreground">Client Username</th>
+                <th className="text-left py-3 px-4 text-sm text-muted-foreground">Server</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">
                   <button className="flex items-center gap-1 hover:text-foreground ml-auto">
                     Deal Amount <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Holder Fee</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">Client Fee</th>
+                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Holder Fee</th>
+                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Server Fee</th>
                 <th className="text-right py-3 px-4 text-sm text-muted-foreground">
                   <button className="flex items-center gap-1 hover:text-foreground ml-auto">
                     Profit <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th className="text-right py-3 px-4 text-sm text-muted-foreground">
-                  <button className="flex items-center gap-1 hover:text-foreground ml-auto">
-                    Loss <ArrowUpDown className="w-3 h-3" />
-                  </button>
-                </th>
-                <th className="text-right py-3 px-4 text-sm text-muted-foreground">Net Result</th>
-                <th className="text-center py-3 px-4 text-sm text-muted-foreground">Status</th>
                 <th className="text-center py-3 px-4 text-sm text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {deals.map((deal) => {
-                const netResult = deal.profit - deal.loss;
-                return (
-                  <tr key={deal.id} className="border-t border-border hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 text-sm">{formatDate(deal.dealDate)}</td>
-                    <td className="py-3 px-4 text-sm">{deal.holderUsername}</td>
-                    <td className="py-3 px-4 text-sm">{deal.clientUsername}</td>
-                    <td className="py-3 px-4 text-sm text-right">${deal.dealAmount.toLocaleString()}</td>
-                    <td className="py-3 px-4 text-sm text-right text-purple-400">${deal.holderFee.toLocaleString()}</td>
-                    <td className="py-3 px-4 text-sm text-right text-cyan-400">${deal.clientFee.toLocaleString()}</td>
-                    <td className="py-3 px-4 text-sm text-right text-green-500">
-                      {deal.profit > 0 ? `$${deal.profit.toLocaleString()}` : '-'}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-right text-red-500">
-                      {deal.loss > 0 ? `$${deal.loss.toLocaleString()}` : '-'}
-                    </td>
-                    <td className={`py-3 px-4 text-sm text-right ${netResult >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      ${netResult.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs ${
-                          deal.status === 'PROFIT'
-                            ? 'bg-green-500/10 text-green-500'
-                            : deal.status === 'LOSS'
-                              ? 'bg-red-500/10 text-red-500'
-                              : 'bg-yellow-500/10 text-yellow-500'
-                        }`}
+              {deals.map((deal) => (
+                <tr key={deal.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                  <td className="py-3 px-4 text-sm">{formatDate(deal.dealDate)}</td>
+                  <td className="py-3 px-4 text-sm">{deal.holderUsername}</td>
+                  <td className="py-3 px-4 text-sm">{deal.serverName ?? '-'}</td>
+                  <td className="py-3 px-4 text-sm text-right">${deal.dealAmount.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-sm text-right text-cyan-400">${deal.clientFee.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-sm text-right text-purple-400">${deal.holderFee.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-sm text-right text-blue-400">${deal.serverFee.toLocaleString()}</td>
+                  <td className={`py-3 px-4 text-sm text-right ${deal.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    ${deal.profit.toLocaleString()}
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onEditDeal(deal)}
+                        className="p-1.5 hover:bg-muted rounded transition-colors"
                       >
-                        {formatStatus(deal.status)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onEditDeal(deal)}
-                          className="p-1.5 hover:bg-muted rounded transition-colors"
-                        >
-                          <Edit className="w-4 h-4 text-blue-400" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(deal)}
-                          className="p-1.5 hover:bg-muted rounded transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-400" />
-                        </button>
+                        <Edit className="w-4 h-4 text-blue-400" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(deal)}
+                        className="p-1.5 hover:bg-muted rounded transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      </button>
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -339,7 +297,7 @@ export default function DealRecordsPage({ onEditDeal, searchTerm, onSearchChange
               <div>
                 <h3 className="text-foreground">Delete Deal</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  This will permanently remove the deal between {dealToDelete.holderUsername} and {dealToDelete.clientUsername}.
+                  This will permanently remove the deal by {dealToDelete.holderUsername} on {dealToDelete.serverName ?? 'this server'}.
                 </p>
               </div>
               <button
