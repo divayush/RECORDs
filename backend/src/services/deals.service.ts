@@ -5,10 +5,9 @@ import { statsService } from './stats.service.js';
 
 const moneyToCents = (value: number) => Math.round(value * 100);
 const centsToMoney = (value: number) => value / 100;
-const calculateProfit = (dealAmount: number, clientFee: number, holderFee: number, serverFee: number) =>
-  dealAmount - clientFee - serverFee - holderFee;
-const getCalculatedProfitCents = (deal: Deal) =>
-  deal.dealAmount - deal.clientFee - (deal.serverFee ?? 0) - deal.holderFee;
+const calculateProfit = (clientFee: number, holderFee: number, serverFee: number) =>
+  clientFee - (holderFee + serverFee);
+const getCalculatedProfitCents = (deal: Deal) => deal.clientFee - (deal.holderFee + (deal.serverFee ?? 0));
 
 const serializeDeal = (deal: Deal): DealResponse => ({
   id: deal.id,
@@ -36,12 +35,12 @@ const toCreateData = (input: DealInput): Prisma.DealCreateInput => ({
   holderUsername: input.holderUsername,
   clientUsername: input.clientUsername,
   serverName: input.serverName,
-  profit: moneyToCents(calculateProfit(input.dealAmount, input.clientFee, input.holderFee, input.serverFee)),
+  profit: moneyToCents(calculateProfit(input.clientFee, input.holderFee, input.serverFee)),
   loss: 0,
   dealDate: input.dealDate,
   status:
     input.status ??
-    (calculateProfit(input.dealAmount, input.clientFee, input.holderFee, input.serverFee) >= 0 ? 'PROFIT' : 'LOSS'),
+    (calculateProfit(input.clientFee, input.holderFee, input.serverFee) >= 0 ? 'PROFIT' : 'LOSS'),
   notes: input.notes,
 });
 
@@ -58,11 +57,10 @@ const toUpdateData = (input: Partial<DealInput>, currentDeal: Deal): Prisma.Deal
   if (input.dealDate !== undefined) data.dealDate = input.dealDate;
   if (input.notes !== undefined) data.notes = input.notes;
 
-  const nextDealAmount = input.dealAmount !== undefined ? moneyToCents(input.dealAmount) : currentDeal.dealAmount;
   const nextClientFee = input.clientFee !== undefined ? moneyToCents(input.clientFee) : currentDeal.clientFee;
   const nextHolderFee = input.holderFee !== undefined ? moneyToCents(input.holderFee) : currentDeal.holderFee;
   const nextServerFee = input.serverFee !== undefined ? moneyToCents(input.serverFee) : currentDeal.serverFee ?? 0;
-  const nextProfit = nextDealAmount - nextClientFee - nextServerFee - nextHolderFee;
+  const nextProfit = nextClientFee - (nextHolderFee + nextServerFee);
 
   data.profit = nextProfit;
   data.loss = 0;

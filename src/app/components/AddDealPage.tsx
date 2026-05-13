@@ -55,12 +55,8 @@ export default function AddDealPage({ deal, onSaved, onCancel }: AddDealPageProp
   });
 
   const calculatedProfit = useMemo(
-    () =>
-      toNumber(formData.dealAmount) -
-      toNumber(formData.clientFee) -
-      toNumber(formData.serverFee) -
-      toNumber(formData.holderFee),
-    [formData.clientFee, formData.dealAmount, formData.holderFee, formData.serverFee],
+    () => toNumber(formData.clientFee) - (toNumber(formData.holderFee) + toNumber(formData.serverFee)),
+    [formData.clientFee, formData.holderFee, formData.serverFee],
   );
 
   const validateForm = () => {
